@@ -94,29 +94,40 @@ namespace Recruiter
 						throw new Exception("Recruiter Home Settelment is not a castle nor a town. How could this happen?");
 					}
 
-					bool hasGarisson = false;
-					foreach (MobileParty party in recruiter.HomeSettlement.Parties)
+					recruitAll(recruiter, recruiter.CurrentSettlement);
+					Settlement nearestWithRecruits = findNearestSettlementWithRecruitableRecruits(recruiter);
+					if (nearestWithRecruits != null)
 					{
-						if (party.IsGarrison)
+						recruiter.SetMoveGoToSettlement(nearestWithRecruits);
+					}
+
+					else
+					{
+						bool hasGarisson = false;
+						foreach (MobileParty party in recruiter.HomeSettlement.Parties)
 						{
-							hasGarisson = true;
-							break;
+							if (party.IsGarrison)
+							{
+								hasGarisson = true;
+								break;
+							}
 						}
+						if (!hasGarisson)
+							recruiter.HomeSettlement.AddGarrisonParty();
+						MobileParty garrision = recruiter.HomeSettlement.Parties.First(party => party.IsGarrison);
+
+						int soldierCount = recruiter.MemberRoster.TotalManCount;
+						foreach (TroopRosterElement rosterElement in recruiter.MemberRoster)
+						{
+							int healthy = rosterElement.Number - rosterElement.WoundedNumber;
+							garrision.MemberRoster.AddToCounts(rosterElement.Character, healthy, false, rosterElement.WoundedNumber);
+						}
+						InformationManager.DisplayMessage(new InformationMessage("Your recruiter brought " + soldierCount + " soldiers to " + recruiter.HomeSettlement + "."));
+						toBeDeleted.Add(recruiter);
+						recruiter.RemoveParty();
+						continue;
 					}
-					if(!hasGarisson)
-						recruiter.HomeSettlement.AddGarrisonParty();
-					MobileParty garrision = recruiter.HomeSettlement.Parties.First(party => party.IsGarrison);
 					
-					int soldierCount = recruiter.MemberRoster.TotalManCount;
-					foreach (TroopRosterElement rosterElement in recruiter.MemberRoster)
-					{
-						int healthy = rosterElement.Number - rosterElement.WoundedNumber;
-						garrision.MemberRoster.AddToCounts(rosterElement.Character, healthy, false, rosterElement.WoundedNumber);
-					}
-					InformationManager.DisplayMessage(new InformationMessage("Your recruiter brought " + soldierCount + " soldiers to " + recruiter.HomeSettlement + "."));
-					toBeDeleted.Add(recruiter);
-					recruiter.RemoveParty();
-					continue;
 				}
 				else if(recruiter.CurrentSettlement != null)
 				{
@@ -144,6 +155,30 @@ namespace Recruiter
 
 		}
 
+		private bool hasSettlementRecruits(Settlement settlement, MobileParty recruiter)
+		{
+			DefaultPartyWageModel wageModel = new DefaultPartyWageModel();
+			foreach (Hero notable in settlement.Notables)
+			{
+				for (int i = 0; i < notable.VolunteerTypes.Length; i++)
+				{
+					CharacterObject character = notable.VolunteerTypes[i];
+					if (character == null)
+					{
+						continue;
+					}
+
+					if (wageModel.GetTroopRecruitmentCost(character, Hero.MainHero) > recruiter.PartyTradeGold || !hasSufficientRelationsship(notable, i))
+					{
+						continue;
+					}
+
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private Settlement findNearestSettlementWithRecruitableRecruits(MobileParty recruiter)
 		{
 			IEnumerable<Settlement> settlementsWithRecruits = Settlement.All.Where(settlement => settlement.GetNumberOfAvailableRecruits() > 0 && !settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan));
@@ -154,32 +189,9 @@ namespace Recruiter
 			
 			foreach (Settlement settlement in settlementsWithRecruits)
 			{
-				bool hasRecruitableRecruits = false;
-				foreach (Hero notable in settlement.Notables)
-				{
-					for (int i = 0; i < notable.VolunteerTypes.Length; i++)
-					{
-						CharacterObject character = notable.VolunteerTypes[i];
-						if(character == null)
-						{
-							continue;
-						}
 
-						if (wageModel.GetTroopRecruitmentCost(character, Hero.MainHero) > recruiter.PartyTradeGold || !hasSufficientRelationsship(notable, i))
-						{
-							continue;
-						}
 
-						hasRecruitableRecruits = true;
-						break;
-					}
-					if (hasRecruitableRecruits)
-					{
-						break;
-					}
-				}
-
-				if(!hasRecruitableRecruits)
+				if(!hasSettlementRecruits(settlement, recruiter))
 				{
 					continue;
 				}
