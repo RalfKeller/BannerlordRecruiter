@@ -20,9 +20,22 @@ namespace Recruiter
     class RecruiterBehaviour : CampaignBehaviorBase
     {
 		Random rand = new Random();
-		List<MobileParty> allRecruiters = new List<MobileParty>();
+		Dictionary<MobileParty, RecruiterProperties> allRecruitersToProperties = new Dictionary<MobileParty, RecruiterProperties>();
 		private void OnSessionLaunched(CampaignGameStarter obj)
 		{
+			IEnumerable<Settlement> buggedSettlements = Settlement.All.Where(settlement => settlement.Parties.Count(party => party.IsGarrison) > 0 && settlement.Parties.First(party => party.IsGarrison).MemberRoster.Count == 0);
+
+			foreach (Settlement settlement in buggedSettlements)
+			{
+				IEnumerable<MobileParty> buggedParties = settlement.Parties.Where(party => party.IsGarrison && party.MemberRoster.Count == 0);
+				if(buggedParties.Count() > 0)
+				{
+					foreach (MobileParty party in buggedParties)
+					{
+						party.RemoveParty();
+					}
+				} 
+			}
 			//this.trackPatrols();
 			try
 			{
@@ -55,10 +68,10 @@ namespace Recruiter
 		{
 			if (recruiter != null)
 			{
-				if (allRecruiters.Contains(recruiter))
+				if (allRecruitersToProperties.Keys.Contains(recruiter))
 				{
 					InformationManager.DisplayMessage(new InformationMessage("Your recruiter bringing recruits to " + recruiter.Name.ToString().Substring(0, recruiter.Name.ToString().Length - " Recruiter".Length) + " has been killed!", new Color(1f, 0f, 0f)));
-					allRecruiters.Remove(recruiter);
+					allRecruitersToProperties.Remove(recruiter);
 					recruiter.RemoveParty();
 				}
 			}
@@ -68,9 +81,9 @@ namespace Recruiter
 		{
 			if(recruiter != null)
 			{
-				if (allRecruiters.Contains(recruiter))
+				if (allRecruitersToProperties.Keys.Contains(recruiter))
 				{
-					allRecruiters.Remove(recruiter);
+					allRecruitersToProperties.Remove(recruiter);
 					recruiter.RemoveParty();
 				}
 			}
@@ -84,7 +97,7 @@ namespace Recruiter
 		private void RecruiterHourlyAi()
 		{
 			List<MobileParty> toBeDeleted = new List<MobileParty>();
-			foreach(MobileParty recruiter in allRecruiters)
+			foreach(MobileParty recruiter in allRecruitersToProperties.Keys)
 			{
 				if(recruiter.HomeSettlement == null)
 				{
@@ -159,7 +172,7 @@ namespace Recruiter
 
 			foreach (MobileParty deletedRecruiter in toBeDeleted)
 			{
-				allRecruiters.Remove(deletedRecruiter);
+				allRecruitersToProperties.Remove(deletedRecruiter);
 			}
 
 		}
@@ -167,6 +180,10 @@ namespace Recruiter
 		private bool hasSettlementRecruits(Settlement settlement, MobileParty recruiter)
 		{
 			DefaultPartyWageModel wageModel = new DefaultPartyWageModel();
+			if (settlement.IsRaided)
+			{
+				return false;
+			}
 			foreach (Hero notable in settlement.Notables)
 			{
 				for (int i = 0; i < notable.VolunteerTypes.Length; i++)
@@ -190,7 +207,24 @@ namespace Recruiter
 
 		private Settlement findNearestSettlementWithRecruitableRecruits(MobileParty recruiter)
 		{
-			IEnumerable<Settlement> settlementsWithRecruits = Settlement.All.Where(settlement => settlement.GetNumberOfAvailableRecruits() > 0 && !settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan));
+			RecruiterProperties props = new RecruiterProperties();
+			allRecruitersToProperties.TryGetValue(recruiter, out props);
+			CultureObject onlyCulture = props.SearchCulture;
+			IEnumerable<Settlement> settlementsWithRecruits;
+			if (onlyCulture != null)
+			{
+				settlementsWithRecruits = Settlement.All.
+					Where(settlement => settlement.GetNumberOfAvailableRecruits() > 0 && 
+					!settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan) && 
+					settlement.Culture.Name.ToString().Equals(onlyCulture.Name.ToString()));
+			}
+			else
+			{
+				settlementsWithRecruits = Settlement.All.
+					Where(settlement => settlement.GetNumberOfAvailableRecruits() > 0 
+					&& !settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan));
+			}
+
 			DefaultPartyWageModel wageModel = new DefaultPartyWageModel();
 
 			Settlement nearest = null;
@@ -198,7 +232,6 @@ namespace Recruiter
 			
 			foreach (Settlement settlement in settlementsWithRecruits)
 			{
-
 
 				if(!hasSettlementRecruits(settlement, recruiter))
 				{
@@ -273,10 +306,34 @@ namespace Recruiter
 
 		public override void SyncData(IDataStore dataStore)
         {
-            dataStore.SyncData<List<MobileParty>>("allRecruiters", ref this.allRecruiters);
+			List<MobileParty> allRecruitersLegacy = new List<MobileParty>();
+            dataStore.SyncData<List<MobileParty>>("allRecruiters", ref allRecruitersLegacy);
+			dataStore.SyncData<Dictionary<MobileParty, RecruiterProperties>>("allRecruitersToProperties", ref allRecruitersToProperties);
+
+			foreach (MobileParty recruiter in allRecruitersLegacy)
+			{
+				if(!allRecruitersToProperties.ContainsKey(recruiter))
+				{
+					allRecruitersToProperties.Add(recruiter, new RecruiterProperties());
+				}
+			}
         }
 
+		public List<CultureObject> getPossibleCultures()
+		{
+			IEnumerable<Settlement> settlements = Settlement.All;
 
+			List<CultureObject> returnList = new List<CultureObject>();
+			foreach (Settlement settlement in settlements)
+			{
+				if(!returnList.Contains(settlement.Culture))
+				{
+					returnList.Add(settlement.Culture);
+				}
+			}
+
+			return returnList;
+		}
 
 		public void AddRecruiterMenu(CampaignGameStarter obj)
 		{
@@ -287,8 +344,27 @@ namespace Recruiter
 			};
 			GameMenuOption.OnConsequenceDelegate hireRecruiterConsequenceDelegate = delegate (MenuCallbackArgs args)
 			{
-				GameMenu.SwitchToMenu("recruiter_pay_menu");
+				GameMenu.SwitchToMenu("recruiter_culture_menu");
 			};
+
+			obj.AddGameMenu("recruiter_culture_menu", "The Chamberlain asks you what culture your recruits should be.", null, GameOverlays.MenuOverlayType.None, GameMenu.MenuFlags.none, null);
+
+			RecruiterProperties props = new RecruiterProperties();
+			foreach (CultureObject culture in getPossibleCultures())
+			{
+				obj.AddGameMenuOption("recruiter_culture_menu", "recruiter_" + culture.GetName().ToString(), culture.GetName().ToString(),
+					delegate (MenuCallbackArgs args)
+				{
+					return Settlement.All.Count(settlement => settlement.Culture == culture && settlement.OwnerClan != null && !settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan)) > 0;
+				},
+				delegate (MenuCallbackArgs args)
+				{
+					props = new RecruiterProperties();
+					props.SearchCulture = culture;
+					GameMenu.SwitchToMenu("recruiter_pay_menu");
+				});
+
+			}
 
 			obj.AddGameMenuOption("town_keep", "recruiter_buy_recruiter", "Hire a Recruiter", hireRecruiterDelegate, hireRecruiterConsequenceDelegate, false, 4, false);
 			obj.AddGameMenuOption("castle", "recruiter_buy_recruiter", "Hire a Recruiter", hireRecruiterDelegate, hireRecruiterConsequenceDelegate, false, 4, false);
@@ -310,7 +386,7 @@ namespace Recruiter
 				if (flag)
 				{
 					GiveGoldAction.ApplyForCharacterToSettlement(Hero.MainHero, Settlement.CurrentSettlement, cost, false);
-					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost);
+					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost, props);
 				}
 				GameMenu.SwitchToMenu("castle");
 			}, false, -1, false);
@@ -329,7 +405,7 @@ namespace Recruiter
 				if (flag)
 				{
 					GiveGoldAction.ApplyForCharacterToSettlement(Hero.MainHero, Settlement.CurrentSettlement, cost, false);
-					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost);
+					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost, props);
 				}
 				GameMenu.SwitchToMenu("castle");
 			}, false, -1, false);
@@ -348,7 +424,7 @@ namespace Recruiter
 				if (flag)
 				{
 					GiveGoldAction.ApplyForCharacterToSettlement(Hero.MainHero, Settlement.CurrentSettlement, cost, false);
-					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost);
+					MobileParty item = this.spawnRecruiter(Settlement.CurrentSettlement, cost, props);
 				}
 				GameMenu.SwitchToMenu("castle");
 			}, false, -1, false);
@@ -360,7 +436,7 @@ namespace Recruiter
 			GameMenu.SwitchToMenu("castle");
 		}
 
-		public MobileParty spawnRecruiter(Settlement settlement, int cash)
+		public MobileParty spawnRecruiter(Settlement settlement, int cash, RecruiterProperties props)
 		{
 			PartyTemplateObject defaultPartyTemplate = settlement.Culture.DefaultPartyTemplate;
 			int numberOfCreated = defaultPartyTemplate.NumberOfCreated;
@@ -372,8 +448,8 @@ namespace Recruiter
 			mobileParty.PartyTradeGold = cash;
 			this.InitRecruiterParty(mobileParty, textObject, settlement.OwnerClan, settlement);
 			mobileParty.Aggressiveness = 0f;
+			allRecruitersToProperties.Add(mobileParty, props);
 			mobileParty.SetMoveGoToSettlement(findNearestSettlementWithRecruitableRecruits(mobileParty));
-			allRecruiters.Add(mobileParty);
 			return mobileParty;
 		}
 

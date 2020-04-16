@@ -253,6 +253,7 @@
   <ItemGroup>
     <Compile Include="LINQException.cs" />
     <Compile Include="RecruiterBehaviour.cs" />
+    <Compile Include="RecruiterProperties.cs" />
     <Compile Include="RecruiterSubModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Readme.txt" />
