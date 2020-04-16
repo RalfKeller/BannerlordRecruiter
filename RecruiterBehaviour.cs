@@ -48,7 +48,21 @@ namespace Recruiter
             CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, new Action(this.RecruiterHourlyAi));
             CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, new Action(this.OnDailyAITick));
             CampaignEvents.OnPartyDisbandedEvent.AddNonSerializedListener(this, new Action<MobileParty>(this.DisbandPatrol));
+			CampaignEvents.MobilePartyDestroyed.AddNonSerializedListener(this, new Action<MobileParty, PartyBase>(this.RecruiterDestroyed));
         }
+
+		private void RecruiterDestroyed(MobileParty recruiter, PartyBase arg2)
+		{
+			if (recruiter != null)
+			{
+				if (allRecruiters.Contains(recruiter))
+				{
+					InformationManager.DisplayMessage(new InformationMessage("Your recruiter bringing recruits to " + recruiter.Name.ToString().Substring(0, recruiter.Name.ToString().Length - " Recruiter".Length) + " has been killed!", new Color(1f, 0f, 0f)));
+					allRecruiters.Remove(recruiter);
+					recruiter.RemoveParty();
+				}
+			}
+		}
 
 		private void DisbandPatrol(MobileParty recruiter)
 		{
@@ -58,11 +72,6 @@ namespace Recruiter
 				{
 					allRecruiters.Remove(recruiter);
 					recruiter.RemoveParty();
-				}
-
-				else if(recruiter.Name.ToString().EndsWith("Recruiter"))
-				{
-					InformationManager.DisplayMessage(new InformationMessage("Your recruiter got killed!"));
 				}
 			}
 		}
@@ -122,7 +131,7 @@ namespace Recruiter
 							int healthy = rosterElement.Number - rosterElement.WoundedNumber;
 							garrision.MemberRoster.AddToCounts(rosterElement.Character, healthy, false, rosterElement.WoundedNumber);
 						}
-						InformationManager.DisplayMessage(new InformationMessage("Your recruiter brought " + soldierCount + " soldiers to " + recruiter.HomeSettlement + "."));
+						InformationManager.DisplayMessage(new InformationMessage("Your recruiter brought " + soldierCount + " soldiers to " + recruiter.HomeSettlement + ".", new Color(0f, 1f, 0f)));
 						toBeDeleted.Add(recruiter);
 						recruiter.RemoveParty();
 						continue;
