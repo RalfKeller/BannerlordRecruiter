@@ -1,0 +1,25 @@
+﻿<Module>
+  <Name value="Recruiter"/>
+  <Id value="Recruiter"/>
+  <Version value="v1.0.2"/>
+  <SingleplayerModule value="true"/>
+  <MultiplayerModule value="false"/>
+  <DependedModules>
+    <DependedModule Id="Native"/>
+    <DependedModule Id="SandBoxCore"/>
+    <DependedModule Id="Sandbox"/>
+    <DependedModule Id="StoryMode" />
+  </DependedModules>
+  <SubModules>
+    <SubModule>
+      <Name value="Recruiter"/>
+      <DLLName value="Recruiter.dll"/>
+      <SubModuleClassType value="Recruiter.RecruiterSubModule"/>
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
+  </SubModules>
+  <Xmls/>
+</Module>
