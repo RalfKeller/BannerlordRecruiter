@@ -9,27 +9,28 @@ namespace Recruiter
 		// Token: 0x0600003C RID: 60 RVA: 0x000033F8 File Offset: 0x000015F8
 		public override int GetPartyMemberSizeLimit(PartyBase party, StatExplainer explanation = null)
 		{
-			if (party.Name.ToString().EndsWith("Recruiter"))
+			if(party.Owner != null && party.Owner.IsHumanPlayerCharacter)
 			{
-				return 200;
+				if (party.Name.ToString().EndsWith("Recruiter"))
+				{
+					return 200;
+				}
 			}
-			else
-			{
-				return base.GetPartyMemberSizeLimit(party, explanation);
-			}
+			return base.GetPartyMemberSizeLimit(party, explanation);
+
 		}
 
 		public override int GetPartyPrisonerSizeLimit(PartyBase party, StatExplainer explanation = null)
 		{
-			if (party.Name.ToString().EndsWith("Recruiter"))
+			if (party.Owner != null && party.Owner.IsHumanPlayerCharacter)
 			{
-				return 200;
+				if (party.Name.ToString().EndsWith("Recruiter"))
+				{
+					return 200;
+				}
 			}
-
-			else
-			{
 				return base.GetPartyPrisonerSizeLimit(party, explanation);
-			}
+			
 		}
 	}
 }

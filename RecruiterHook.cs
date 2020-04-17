@@ -22,9 +22,11 @@ namespace Recruiter
 
                 foreach (PartyBase recruiter in Hero.MainHero.OwnedParties.Where(party => party.Name.ToString().EndsWith("Recruiter")))
                 {
-                    ClanPartyItemVM partyItem = new ClanPartyItemVM(recruiter, null, null);
-                    partyItem.PartyLocationText = "Travelling to " + recruiter.MobileParty.TargetSettlement;
-                    partyItem.PartyMoraleText = recruiter.MobileParty.PartyTradeGold + "G";
+                    ClanPartyItemVM partyItem = new ClanPartyItemVM(recruiter, null, null)
+                    {
+                        PartyLocationText = "Travelling to " + recruiter.MobileParty.TargetSettlement,
+                        PartyMoraleText = recruiter.MobileParty.PartyTradeGold + "G"
+                    };
                     clanVM.ClanParties.Garrisons.Add(partyItem);
                 }
 
