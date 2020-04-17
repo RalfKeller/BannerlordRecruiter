@@ -14,28 +14,16 @@ using TaleWorlds.CampaignSystem.ViewModelCollection.GameMenu;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
+using TaleWorlds.SaveSystem;
 
 namespace Recruiter
 {
     class RecruiterBehaviour : CampaignBehaviorBase
     {
 		Random rand = new Random();
-		Dictionary<MobileParty, RecruiterProperties> allRecruitersToProperties = new Dictionary<MobileParty, RecruiterProperties>();
+		List<RecruiterProperties> recruiterProperties = new List<RecruiterProperties>();
 		private void OnSessionLaunched(CampaignGameStarter obj)
 		{
-			IEnumerable<Settlement> buggedSettlements = Settlement.All.Where(settlement => settlement.Parties.Count(party => party.IsGarrison) > 0 && settlement.Parties.First(party => party.IsGarrison).MemberRoster.Count == 0);
-
-			foreach (Settlement settlement in buggedSettlements)
-			{
-				IEnumerable<MobileParty> buggedParties = settlement.Parties.Where(party => party.IsGarrison && party.MemberRoster.Count == 0);
-				if(buggedParties.Count() > 0)
-				{
-					foreach (MobileParty party in buggedParties)
-					{
-						party.RemoveParty();
-					}
-				} 
-			}
 			//this.trackPatrols();
 			try
 			{
@@ -68,10 +56,11 @@ namespace Recruiter
 		{
 			if (recruiter != null)
 			{
-				if (allRecruitersToProperties.Keys.Contains(recruiter))
+				RecruiterProperties props = recruiterProperties.FirstOrDefault(prop => prop.party == recruiter);
+				if (props != null && recruiterProperties.Contains(props))
 				{
 					InformationManager.DisplayMessage(new InformationMessage("Your recruiter bringing recruits to " + recruiter.Name.ToString().Substring(0, recruiter.Name.ToString().Length - " Recruiter".Length) + " has been killed!", new Color(1f, 0f, 0f)));
-					allRecruitersToProperties.Remove(recruiter);
+					recruiterProperties.Remove(props);
 					recruiter.RemoveParty();
 				}
 			}
@@ -81,9 +70,10 @@ namespace Recruiter
 		{
 			if(recruiter != null)
 			{
-				if (allRecruitersToProperties.Keys.Contains(recruiter))
+				RecruiterProperties props = recruiterProperties.FirstOrDefault(prop => prop.party == recruiter);
+				if (props != null && recruiterProperties.Contains(props))
 				{
-					allRecruitersToProperties.Remove(recruiter);
+					recruiterProperties.Remove(props);
 					recruiter.RemoveParty();
 				}
 			}
@@ -96,22 +86,24 @@ namespace Recruiter
 
 		private void RecruiterHourlyAi()
 		{
-			List<MobileParty> toBeDeleted = new List<MobileParty>();
-			foreach(MobileParty recruiter in allRecruitersToProperties.Keys)
+			List<RecruiterProperties> toBeDeleted = new List<RecruiterProperties>();
+
+			foreach (RecruiterProperties prop in recruiterProperties)
 			{
-				if(recruiter.HomeSettlement == null)
+				MobileParty recruiter = prop.party;
+				if (recruiter.HomeSettlement == null)
 				{
-					toBeDeleted.Add(recruiter);
+					toBeDeleted.Add(prop);
 					break;
 				}
-				if(recruiter.PartyTradeGold < 20)
+				if (recruiter.PartyTradeGold < 20)
 				{
 					recruiter.SetMoveGoToSettlement(recruiter.HomeSettlement);
 				}
 
-				if(recruiter.CurrentSettlement == recruiter.HomeSettlement)
+				if (recruiter.CurrentSettlement == recruiter.HomeSettlement)
 				{
-					if(!(recruiter.HomeSettlement.IsCastle || recruiter.HomeSettlement.IsTown))
+					if (!(recruiter.HomeSettlement.IsCastle || recruiter.HomeSettlement.IsTown))
 					{
 						throw new Exception("Recruiter Home Settelment is not a castle nor a town. How could this happen?");
 					}
@@ -145,23 +137,23 @@ namespace Recruiter
 							garrision.MemberRoster.AddToCounts(rosterElement.Character, healthy, false, rosterElement.WoundedNumber);
 						}
 						InformationManager.DisplayMessage(new InformationMessage("Your recruiter brought " + soldierCount + " soldiers to " + recruiter.HomeSettlement + ".", new Color(0f, 1f, 0f)));
-						toBeDeleted.Add(recruiter);
+						toBeDeleted.Add(prop);
 						recruiter.RemoveParty();
 						continue;
 					}
-					
+
 				}
-				else if(recruiter.CurrentSettlement != null)
+				else if (recruiter.CurrentSettlement != null)
 				{
 					recruitAll(recruiter, recruiter.CurrentSettlement);
 					Settlement temp = findNearestSettlementWithRecruitableRecruits(recruiter);
-					if(temp != null)
+					if (temp != null)
 						recruiter.SetMoveGoToSettlement(findNearestSettlementWithRecruitableRecruits(recruiter));
 				}
 				else
 				{
 					Settlement closestWithRecruits = findNearestSettlementWithRecruitableRecruits(recruiter);
-					if(closestWithRecruits == null)
+					if (closestWithRecruits == null)
 					{
 						recruiter.SetMoveGoToSettlement(recruiter.HomeSettlement);
 						return;
@@ -170,9 +162,9 @@ namespace Recruiter
 				}
 			}
 
-			foreach (MobileParty deletedRecruiter in toBeDeleted)
+			foreach (RecruiterProperties prop in toBeDeleted)
 			{
-				allRecruitersToProperties.Remove(deletedRecruiter);
+				recruiterProperties.Remove(prop);
 			}
 
 		}
@@ -207,8 +199,7 @@ namespace Recruiter
 
 		private Settlement findNearestSettlementWithRecruitableRecruits(MobileParty recruiter)
 		{
-			RecruiterProperties props = new RecruiterProperties();
-			allRecruitersToProperties.TryGetValue(recruiter, out props);
+			RecruiterProperties props = recruiterProperties.First(prop => prop.party == recruiter);
 			CultureObject onlyCulture = props.SearchCulture;
 			IEnumerable<Settlement> settlementsWithRecruits;
 			if (onlyCulture != null)
@@ -306,17 +297,18 @@ namespace Recruiter
 
 		public override void SyncData(IDataStore dataStore)
         {
-			List<MobileParty> allRecruitersLegacy = new List<MobileParty>();
-            dataStore.SyncData<List<MobileParty>>("allRecruiters", ref allRecruitersLegacy);
-			dataStore.SyncData<Dictionary<MobileParty, RecruiterProperties>>("allRecruitersToProperties", ref allRecruitersToProperties);
+			//List<MobileParty> allRecruitersLegacy = new List<MobileParty>();
+			//dataStore.SyncData<List<MobileParty>>("allRecruiters", ref allRecruitersLegacy);
+			//dataStore.SyncData<Dictionary<MobileParty, RecruiterProperties>>("allRecruitersToProperties", ref allRecruitersToProperties);
 
-			foreach (MobileParty recruiter in allRecruitersLegacy)
-			{
-				if(!allRecruitersToProperties.ContainsKey(recruiter))
-				{
-					allRecruitersToProperties.Add(recruiter, new RecruiterProperties());
-				}
-			}
+			//foreach (MobileParty recruiter in allRecruitersLegacy)
+			//{
+			//	if(!allRecruitersToProperties.ContainsKey(recruiter))
+			//	{
+			//		allRecruitersToProperties.Add(recruiter, new RecruiterProperties());
+			//	}
+			//}
+			dataStore.SyncData<List<RecruiterProperties>>("recruiterProperties", ref recruiterProperties);
         }
 
 		public List<CultureObject> getPossibleCultures()
@@ -448,7 +440,8 @@ namespace Recruiter
 			mobileParty.PartyTradeGold = cash;
 			this.InitRecruiterParty(mobileParty, textObject, settlement.OwnerClan, settlement);
 			mobileParty.Aggressiveness = 0f;
-			allRecruitersToProperties.Add(mobileParty, props);
+			props.party = mobileParty;
+			recruiterProperties.Add(props);
 			mobileParty.SetMoveGoToSettlement(findNearestSettlementWithRecruitableRecruits(mobileParty));
 			return mobileParty;
 		}
@@ -483,6 +476,26 @@ namespace Recruiter
 		{
 			args.optionLeaveType = GameMenuOption.LeaveType.Leave;
 			return true;
+		}
+
+		public class BannerlordRecruiterSaveDefiner : SaveableTypeDefiner
+		{
+			// Token: 0x06000043 RID: 67 RVA: 0x000034F1 File Offset: 0x000016F1
+			public BannerlordRecruiterSaveDefiner() : base(91215129)
+			{
+			}
+
+			// Token: 0x06000044 RID: 68 RVA: 0x00003500 File Offset: 0x00001700
+			protected override void DefineClassTypes()
+			{
+				base.AddClassDefinition(typeof(RecruiterProperties), 1);
+			}
+
+			// Token: 0x06000045 RID: 69 RVA: 0x00003515 File Offset: 0x00001715
+			protected override void DefineContainerDefinitions()
+			{
+				base.ConstructContainerDefinition(typeof(List<RecruiterProperties>));
+			}
 		}
 	}
 }
