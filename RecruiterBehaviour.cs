@@ -1,4 +1,5 @@
 ﻿using Helpers;
+using SandBox.GauntletUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ using TaleWorlds.CampaignSystem.Overlay;
 using TaleWorlds.CampaignSystem.SandBox.GameComponents.Party;
 using TaleWorlds.CampaignSystem.ViewModelCollection.GameMenu;
 using TaleWorlds.Core;
+using TaleWorlds.Engine.Screens;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.SaveSystem;
@@ -24,7 +26,7 @@ namespace Recruiter
 		List<RecruiterProperties> recruiterProperties = new List<RecruiterProperties>();
 		private void OnSessionLaunched(CampaignGameStarter obj)
 		{
-			//this.trackPatrols();
+			this.trackRecruiters();
 			try
 			{
 				this.AddRecruiterMenu(obj);
@@ -40,6 +42,23 @@ namespace Recruiter
 			catch (Exception ex2)
 			{
 				MessageBox.Show("Something screwed up in adding patrol dialog. " + ex2.ToString());
+			}
+		}
+
+		private void trackRecruiters()
+		{
+			foreach (PartyBase party in Hero.MainHero.OwnedParties)
+			{
+				if(party.Name.ToString().EndsWith("Recruiter"))
+				{
+					RecruiterProperties recruiterProps = recruiterProperties.FirstOrDefault(prop => prop.party == party.MobileParty);
+					if(recruiterProps== null)
+					{
+						recruiterProps = new RecruiterProperties();
+						recruiterProps.party = party.MobileParty;
+						recruiterProperties.Add(recruiterProps);
+					}
+				}
 			}
 		}
 
@@ -315,11 +334,11 @@ namespace Recruiter
 			//		allRecruitersToProperties.Add(recruiter, new RecruiterProperties());
 			//	}
 			//}
-			dataStore.SyncData<List<RecruiterProperties>>("recruiterProperties", ref recruiterProperties);
-			if(recruiterProperties == null)
-			{
-				recruiterProperties = new List<RecruiterProperties>();
-			}
+			//dataStore.SyncData<List<RecruiterProperties>>("recruiterProperties", ref recruiterProperties);
+			//if(recruiterProperties == null)
+			//{
+			//	recruiterProperties = new List<RecruiterProperties>();
+			//}
         }
 
 		public List<CultureObject> getPossibleCultures()
@@ -334,7 +353,6 @@ namespace Recruiter
 					returnList.Add(settlement.Culture);
 				}
 			}
-
 			return returnList;
 		}
 

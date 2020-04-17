@@ -1,0 +1,344 @@
+<Prefab>
+  <Constants>
+    <Constant Name="Clan.Management.Collapser.Width" BrushLayer="Default" BrushName="Clan.Management.Collapser" BrushValueType="Width" />
+    <Constant Name="Clan.Management.Collapser.Height" BrushLayer="Default" BrushName="Clan.Management.Collapser" BrushValueType="Height" />
+
+    <Constant Name="Clan.Management.LeftTuple.Width" BrushLayer="Default" BrushName="Clan.Management.LeftTuple" BrushValueType="Width" />
+    <Constant Name="Clan.Management.LeftTuple.Height" BrushLayer="Default" BrushName="Clan.Management.LeftTuple" BrushValueType="Height" />
+
+    <Constant Name="Clan.Management.LeftTupleLocked.Width" BrushLayer="Default" BrushName="Clan.Management.LeftTupleLocked" BrushValueType="Width" />
+    <Constant Name="Clan.Management.LeftTupleLocked.Height" BrushLayer="Default" BrushName="Clan.Management.LeftTupleLocked" BrushValueType="Height" />
+
+    <Constant Name="Scroll.Header.Width" BrushLayer="Default" BrushName="Scroll.Header" BrushValueType="Width" />
+    <Constant Name="Scroll.Header.Height" BrushLayer="Default" BrushName="Scroll.Header" BrushValueType="Height" />
+
+    <Constant Name="Clan.Header.Width" BrushLayer="Default" BrushName="Clan.Header" BrushValueType="Width" />
+    <Constant Name="Clan.Header.Height" BrushLayer="Default" BrushName="Clan.Header" BrushValueType="Height" />
+
+    <Constant Name="Kingdom.Item.Tuple.Width" BrushLayer="Default" BrushName="Kingdom.Item.Tuple" BrushValueType="Width" />
+    <Constant Name="Kingdom.Item.Tuple.Height" BrushLayer="Default" BrushName="Kingdom.Item.Tuple" BrushValueType="Height" />
+  </Constants>
+  <Window>
+    <Widget Id="ClanPartiesWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsVisible="@IsSelected">
+      <Children>
+
+        <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+          <Children>
+
+            <!--Left Panel-->
+            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" VerticalAlignment="Bottom" MarginTop="6" MarginBottom="9" MarginLeft="27" Brush="Frame1Brush" LayoutImp.LayoutMethod="VerticalBottomToTop">
+              <Children>
+
+                <!--Horizontal Header Section-->
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" RenderLate="true">
+                  <Children>
+
+                    <ListPanel WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Clan.Header.Width" SuggestedHeight="!Clan.Header.Height" Brush="Clan.Header" RenderLate="true">
+                      <Children>
+
+                        <!--Party Name Label-->
+                        <TextWidget HeightSizePolicy ="StretchToParent" WidthSizePolicy="StretchToParent" Brush="Clan.LeftPanel.Header.Text" Text="@NameText" DoNotAcceptEvents="true"/>
+
+                        <!--Party Size Label-->
+                        <TextWidget HeightSizePolicy ="StretchToParent" WidthSizePolicy="Fixed" SuggestedWidth="85" Brush="Clan.LeftPanel.Header.Text"  Text="@SizeText" DoNotAcceptEvents="true" />
+
+                        <!--Party Morale Label-->
+                        <TextWidget HeightSizePolicy ="StretchToParent" WidthSizePolicy="Fixed" SuggestedWidth="100" Brush="Clan.LeftPanel.Header.Text" Text="@MoraleText" DoNotAcceptEvents="true" />
+
+                        <!--Party Location Label-->
+                        <TextWidget HeightSizePolicy ="StretchToParent" WidthSizePolicy="Fixed" SuggestedWidth="200" Brush="Clan.LeftPanel.Header.Text" Text="@LocationText" DoNotAcceptEvents="true"/>
+                      </Children>
+                    </ListPanel>
+
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Scroll.Header.Width" SuggestedHeight="!Scroll.Header.Height" Brush="Scroll.Header" HorizontalAlignment="Right" />
+                  </Children>
+                </ListPanel>
+
+                <!--Horizontal, List and Scrollbar Group-->
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent">
+                  <Children>
+
+                    <ScrollablePanel Id="ClanElementsScrollablePanel" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" MarginLeft="3" MarginBottom="3" AutoHideScrollBars="true" ClipRect="ClanElementsRect" InnerPanel="ClanElementsRect\ClanElementsListPanel" MouseScrollAxis="Vertical" VerticalScrollbar="..\ClanElementsScrollbar\Scrollbar">
+                      <Children>
+
+                        <Widget Id="ClanElementsRect" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" ClipContents="true">
+                          <Children>
+
+                            <ListPanel Id="ClanElementsListPanel" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                              <Children>
+
+                                <!--Parties Toggle Button-->
+                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Clan.Management.Collapser.Width" SuggestedHeight="!Clan.Management.Collapser.Height" HorizontalAlignment="Left" VerticalAlignment="Top" Brush="Clan.Management.Collapser" RenderLate="true" WidgetToClose="..\PartyList">
+                                  <Children>
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Clan.Management.Collapser.Text" Text="@PartiesText" />
+                                  </Children>
+                                </ToggleWidget>
+
+                                <!--Parties List-->
+                                <ListPanel Id="PartyList" DataSource="{Parties}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <ItemTemplate>
+                                    <ClanPartyTuple />
+                                  </ItemTemplate>
+                                </ListPanel>
+								  
+								<RecruiterHook/>
+                                <!--Create New Party Tuple-->
+                                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Kingdom.Item.Tuple.Width" SuggestedHeight="!Kingdom.Item.Tuple.Height" Brush="Kingdom.Item.Tuple">
+                                  <Children>
+                                    <HintWidget DataSource="{CreateNewPartyActionHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" DoNotAcceptEvents="true"/>
+                                    <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Clan.Management.LeftTuple" Command.Click="ExecuteCreateNewParty" IsEnabled="@CanCreateNewParty" UpdateChildrenStates="true">
+                                      <Children>
+                                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Text="@CreateNewPartyText" Brush="Clan.Tuple.Name.Text" Brush.TextHorizontalAlignment="Center"/>
+                                      </Children>
+                                    </ButtonWidget>
+                                  </Children>
+                                </Widget>
+
+                                <!--Caravans Toggle Button-->
+                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Clan.Management.Collapser.Width" SuggestedHeight="!Clan.Management.Collapser.Height" HorizontalAlignment="Left" VerticalAlignment="Top" Brush="Clan.Management.Collapser" RenderLate="true" WidgetToClose="..\CaravansList">
+                                  <Children>
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Clan.Management.Collapser.Text" Text="@CaravansText" />
+                                  </Children>
+                                </ToggleWidget>
+
+                                <!--Caravans List-->
+                                <ListPanel Id="CaravansList" DataSource="{Caravans}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <ItemTemplate>
+                                    <ClanPartyTuple />
+                                  </ItemTemplate>
+                                </ListPanel>
+
+                                <!--Garrisons Toggle Button-->
+                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Clan.Management.Collapser.Width" SuggestedHeight="!Clan.Management.Collapser.Height" HorizontalAlignment="Left" VerticalAlignment="Top" Brush="Clan.Management.Collapser" RenderLate="true" WidgetToClose="..\GarrisonsList">
+                                  <Children>
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Clan.Management.Collapser.Text" Text="@GarrisonsText" />
+                                  </Children>
+                                </ToggleWidget>
+
+                                <!--Garrisons List-->
+                                <ListPanel Id="GarrisonsList" DataSource="{Garrisons}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <ItemTemplate>
+                                    <ClanPartyTuple />
+                                  </ItemTemplate>
+                                </ListPanel>
+
+                                <!--Garrisons Toggle Button-->
+                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Clan.Management.Collapser.Width" SuggestedHeight="!Clan.Management.Collapser.Height" HorizontalAlignment="Left" VerticalAlignment="Top" Brush="Clan.Management.Collapser" RenderLate="true" WidgetToClose="..\DispatchedList">
+                                  <Children>
+                                    <HintWidget DataSource="{DispatchedHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" DoNotAcceptEvents="true"/>
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Clan.Management.Collapser.Text" Text="@DispatchedText" />
+                                  </Children>
+                                </ToggleWidget>
+
+                                <!--Garrisons List-->
+                                <ListPanel Id="DispatchedList" DataSource="{Dispatched}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <ItemTemplate>
+                                    <ClanPartyTuple />
+                                  </ItemTemplate>
+                                </ListPanel>
+
+                              </Children>
+                            </ListPanel>
+
+                          </Children>
+                        </Widget>
+
+                      </Children>
+                    </ScrollablePanel>
+
+                    <Standard.VerticalScrollbar Id="ClanElementsScrollbar" HeightSizePolicy="StretchToParent" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginRight="2" MarginLeft="2" MarginBottom="3"/>
+                  </Children>
+                </ListPanel>
+
+              </Children>
+            </ListPanel>
+
+            <!--Right Panel-->
+
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="350" IsVisible="@IsAnyValidPartySelected">
+              <Children>
+
+
+                <Widget DataSource="{CurrentSelectedParty}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+                  <Children>
+
+                    <!--Right Panel Vertical Container-->
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                      <Children>
+
+                        <!--Visual and Stats Horizontal Container-->
+                        <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren">
+                          <Children>
+
+                            <!--Lord Visual Model-->
+                            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="465" SuggestedHeight="512" ClipContents="true">
+                              <Children>
+
+                                <!--Selected Party Tableau-->
+                                <CharacterTableauWidget DataSource="{CharacterModel}" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedWidth="650" SuggestedHeight="600" VerticalAlignment="Bottom" PositionXOffset="-50" BannerCodeText="@BannerCodeText" CharStringId="@CharStringId" EquipmentCode="@EquipmentCode" BodyProperties="@BodyProperties" IsFemale="@IsFemale" MountCreationKey="@MountCreationKey" StanceIndex="@StanceIndex" ArmorColor1="@ArmorColor1" ArmorColor2="@ArmorColor2"/>
+
+                                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="123" VerticalAlignment="Bottom" PositionYOffset="10" Sprite="Clan\clan_portrait_shadow" IsEnabled="false" />
+                              </Children>
+                            </Widget>
+
+                            <!--Stats and Expense Container-->
+                            <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" MarginLeft="20" MarginRight="20" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                              <Children>
+
+                                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <Children>
+
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="Clan.RightPanel.Name.Text" Text="@Name" />
+                                    <RichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="Clan.RightPanel.SubName.Text" Text="@PartyLocationText" Command.LinkAlternateClick="ExecuteLocationLink" Command.LinkClick="ExecuteLocationLink" />
+
+                                    <ListPanel DataSource="{ItemProperties}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="50" MarginRight="135" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                      <ItemTemplate>
+                                        <ClanStatItem />
+                                      </ItemTemplate>
+                                    </ListPanel>
+
+                                  </Children>
+                                </ListPanel>
+
+                                <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" IsVisible="@ShouldPartyHaveExpense" MarginRight="135" MarginTop="5" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <Children>
+
+                                    <ListPanel WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" IsVisible="@CanControlExpense" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                      <Children>
+
+                                        <!--Payment Ratio Label-->
+                                        <Widget DataSource="{ExpenseItem}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" MarginTop="15" IsEnabled="false" >
+                                          <Children>
+                                            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="Clan.Stat.Name.Text" Text="@PaymentRatioText" />
+                                            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" Brush="Clan.Stat.Value.Text" Text="@PaymentRatio" />
+                                          </Children>
+                                        </Widget>
+
+                                        <!--Target Size Label-->
+                                        <Widget DataSource="{ExpenseItem}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" MarginTop="15" IsEnabled="false" >
+                                          <Children>
+                                            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="Clan.Stat.Name.Text" Text="@TargetSizeText" />
+                                            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" Brush="Clan.Stat.Value.Text" IntText="@PartyTargetSize" />
+                                          </Children>
+                                        </Widget>
+
+                                      </Children>
+                                    </ListPanel>
+
+                                  </Children>
+                                </ListPanel>
+
+                                <Widget WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedHeight = "42" SuggestedWidth = "338" HorizontalAlignment = "Left" VerticalAlignment="Bottom" MarginTop="15" IsVisible="@CanControlExpense">
+                                  <Children>
+                                    <!--Payment Ratio Slider-->
+                                    <ClanFinancePaymentSliderWidget DataSource="{ExpenseItem}" DoNotUpdateHandleSize="true" IsDiscrete = "true" ValueInt="@PaymentRatioValue" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedHeight = "42" SuggestedWidth = "338" HorizontalAlignment = "Left" VerticalAlignment="Bottom" MinValueInt = "0" MaxValueInt = "100" Handle = "SliderHandle" Filler="Filler" CurrentSize="@PartyCurrentSize" TargetSize="@PartyTargetSize" SizeLimit="@PartySizeLimit" CurrentRatioIndicatorWidget="CurrentRatioIndicatorWidget" InitialFillWidget="InitialFillWidget" NewIncreaseFillWidget="NewIncreaseFillWidget" NewDecreaseFillWidget="NewDecreaseFillWidget"  DoNotPassEventsToChildren="true" >
+                                      <Children>
+                                        <Widget DoNotAcceptEvents="true" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "Fixed" SuggestedHeight="30" VerticalAlignment="Center" Sprite="slider_fill_red_9" />
+                                        <Widget Id="Filler" DoNotAcceptEvents="true" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth="10" SuggestedHeight="30"  VerticalAlignment="Center" Sprite="BlankWhiteSquare_9" Brush.Color="#52C635AA"/>
+                                        <Widget Id="InitialFillWidget" DoNotAcceptEvents="true" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth="10" SuggestedHeight="30" VerticalAlignment="Center" Sprite="BlankWhiteSquare_9" Brush.Color="#601D17AA"/>
+                                        <Widget Id="NewIncreaseFillWidget" DoNotAcceptEvents="true" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth="10" SuggestedHeight="30"  VerticalAlignment="Center" Sprite="BlankWhiteSquare_9" Brush.Color="#217028AA" />
+                                        <Widget Id="NewDecreaseFillWidget" DoNotAcceptEvents="true" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth="10" SuggestedHeight="30"  VerticalAlignment="Center" Sprite="BlankWhiteSquare_9" Brush.Color="#E82B1BAA" />
+                                        <Widget Id="CurrentRatioIndicatorWidget" DoNotAcceptEvents="true" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedHeight="45" SuggestedWidth="12" VerticalAlignment="Center" Sprite="Clan\slider_white_tick" />
+                                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="400" SuggestedHeight="65" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="SPOptions\standart_slider_frame" DoNotAcceptEvents="true" />
+                                        <Widget Id="SliderHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="14" SuggestedHeight="38" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="SPOptions.Slider.Handle" DoNotAcceptEvents="true"/>
+                                        <HintWidget DataSource="{ExpenseControlHint}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight = "36" SuggestedWidth = "370" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" DoNotAcceptEvents="true"/>
+                                      </Children>
+                                    </ClanFinancePaymentSliderWidget>
+                                  </Children>
+                                </Widget>
+
+                                <ListPanel WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" IsVisible="@CanControlExpense" PositionYOffset="50" MarginRight="135" LayoutImp.LayoutMethod="VerticalBottomToTop">
+                                  <Children>
+
+                                    <!--Expense Label-->
+                                    <Widget DataSource="{ExpenseItem}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" IsEnabled="false" >
+                                      <Children>
+                                        <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="Clan.Stat.Name.Text" Text="Expense" />
+                                        <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" Brush="Clan.Finance.Settlement.ExpenseText" Text="@ExpenseValueText" />
+                                      </Children>
+                                    </Widget>
+
+                                    <!--Income Label-->
+                                    <Widget WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" IsEnabled="false" MarginTop="5" IsVisible="@IsCaravan" >
+                                      <Children>
+                                        <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="Clan.Stat.Name.Text" Text="Income" />
+                                        <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" Brush="Clan.Finance.Settlement.IncomeText" Brush.TextHorizontalAlignment="Right" IntText="@Income" />
+                                      </Children>
+                                    </Widget>
+
+                                  </Children>
+                                </ListPanel>
+
+                              </Children>
+                            </ListPanel>
+
+                          </Children>
+                        </ListPanel>
+
+                        <!--Seperator Line-->
+                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="4" PositionXOffset="-3" Sprite="Encyclopedia\list_filters_divider" />
+
+                        <!--Action Buttons Container-->
+                        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="156" HorizontalAlignment="Center">
+                          <Children>
+
+                            <!--Disband Party Action Button-->
+                            <Widget DataSource="{..}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" VerticalAlignment="Center">
+                              <Children>
+
+                                <HintWidget DataSource="{DisbandActionHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" DoNotAcceptEvents="true"/>
+
+                                <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" VerticalAlignment="Center" Brush="Popup.Cancel.Button" IsEnabled="@CanDisbandCurrentParty" UpdateChildrenStates="true" Command.Click="ExecuteDisbandCurrentParty">
+                                  <Children>
+                                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Button.Text" Text="@DisbandPartyText" />
+                                  </Children>
+                                </ButtonWidget>
+
+                              </Children>
+                            </Widget>
+
+                            <!--<Widget Id="DropdownParent" WidthSizePolicy="Fixed" SuggestedWidth="251"  HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="@IsPartyBehaviorEnabled">
+                              <Children>
+
+                                <DropdownWidget Id="DropdownParent" DataSource="{PartyBehaviorSelector}" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="251" HorizontalAlignment="Center" VerticalAlignment="Center" Button="DropdownButton" CurrentSelectedIndex="@SelectedIndex" ListPanel="DropdownListPanel" RichTextWidget="DropdownButton\SelectedTextWidget">
+                                  <Children>
+
+                                    <ButtonWidget Id="DropdownButton" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" HorizontalAlignment="Center" VerticalAlignment="Bottom" Brush="Popup.Cancel.Button" Brush.Color="#FF00FFFF">
+                                      <Children>
+                                        <RichTextWidget Id="SelectedTextWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Popup.Button.Text" Text="" />
+                                      </Children>
+                                    </ButtonWidget>
+
+                                    <ListPanel Id="DropdownListPanel" DataSource="{ItemList}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="40" IsVisible="false" LayoutImp.LayoutMethod="VerticalTopToBottom">
+                                      <ItemTemplate>
+                                        <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" HorizontalAlignment="Center" VerticalAlignment="Bottom" Brush="Popup.Cancel.Button" ButtonType="Radio" Brush.Color="#FF00FFFF">
+                                          <Children>
+                                            <RichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Popup.Button.Text" Text="@StringItem" />
+                                          </Children>
+                                        </ButtonWidget>
+                                      </ItemTemplate>
+                                    </ListPanel>
+
+                                  </Children>
+                                </DropdownWidget>
+                              </Children>
+                            </Widget>-->
+
+                          </Children>
+                        </ListPanel>
+
+                      </Children>
+                    </ListPanel>
+
+                  </Children>
+                </Widget>
+              </Children>
+            </Widget>
+
+          </Children>
+        </ListPanel>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>
