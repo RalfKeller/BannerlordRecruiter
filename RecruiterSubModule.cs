@@ -19,6 +19,7 @@ namespace Recruiter
 				try
 				{
 					campaignGameStarter.AddBehavior(new RecruiterBehaviour());
+					gameStarterObject.AddModel(new RecruiterSpeedModel());
 				}
 				catch (Exception ex)
 				{

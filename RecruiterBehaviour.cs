@@ -81,7 +81,14 @@ namespace Recruiter
 
 		private void OnDailyAITick()
 		{
-			RecruiterHourlyAi();
+			foreach (RecruiterProperties prop in recruiterProperties)
+			{
+				if (prop.party.Food <= 3f)
+			{
+					this.generateFood(prop.party);
+				}
+			}
+
 		}
 
 		private void RecruiterHourlyAi()
@@ -309,6 +316,10 @@ namespace Recruiter
 			//	}
 			//}
 			dataStore.SyncData<List<RecruiterProperties>>("recruiterProperties", ref recruiterProperties);
+			if(recruiterProperties == null)
+			{
+				recruiterProperties = new List<RecruiterProperties>();
+			}
         }
 
 		public List<CultureObject> getPossibleCultures()
@@ -446,28 +457,28 @@ namespace Recruiter
 			return mobileParty;
 		}
 
-		public void InitRecruiterParty(MobileParty patrolParty, TextObject name, Clan faction, Settlement homeSettlement)
+		public void InitRecruiterParty(MobileParty recruiter, TextObject name, Clan faction, Settlement homeSettlement)
 		{
-			patrolParty.Name = name;
-			patrolParty.IsMilitia = true;
-			patrolParty.HomeSettlement = homeSettlement;
-			patrolParty.Party.Owner = faction.Leader;
-			patrolParty.SetInititave(0f, 0f, 1E+08f);
-			patrolParty.Party.Visuals.SetMapIconAsDirty();
-			generateFood(patrolParty);
+			recruiter.Name = name;
+			recruiter.IsMilitia = true;
+			recruiter.HomeSettlement = homeSettlement;
+			recruiter.Party.Owner = faction.Leader;
+			recruiter.SetInititave(0f, 1f, 1E+08f);
+			recruiter.Party.Visuals.SetMapIconAsDirty();
+			generateFood(recruiter);
 		}
-		public void generateFood(MobileParty patrolParty)
+		public void generateFood(MobileParty recruiter)
 		{
 			foreach (ItemObject itemObject in ItemObject.All)
 			{
 				bool isFood = itemObject.IsFood;
 				if (isFood)
 				{
-					int num = MBRandom.RoundRandomized((float)patrolParty.MemberRoster.TotalManCount * (1f / (float)itemObject.Value) * 1f * MBRandom.RandomFloat * MBRandom.RandomFloat * MBRandom.RandomFloat * MBRandom.RandomFloat);
+					int num = MBRandom.RoundRandomized((float)recruiter.MemberRoster.TotalManCount * (1f / (float)itemObject.Value) * 1f * MBRandom.RandomFloat * MBRandom.RandomFloat * MBRandom.RandomFloat * MBRandom.RandomFloat);
 					bool flag = num > 0;
 					if (flag)
 					{
-						patrolParty.ItemRoster.AddToCounts(itemObject, num, true);
+						recruiter.ItemRoster.AddToCounts(itemObject, num, true);
 					}
 				}
 			}
