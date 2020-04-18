@@ -184,7 +184,7 @@ namespace Recruiter
 						recruiter.SetMoveGoToSettlement(recruiter.HomeSettlement);
 						return;
 					}
-					recruiter.SetMoveGoToSettlement(findNearestSettlementWithRecruitableRecruits(recruiter));
+					recruiter.SetMoveGoToSettlement(closestWithRecruits);
 				}
 			}
 
@@ -376,7 +376,13 @@ namespace Recruiter
 				obj.AddGameMenuOption("recruiter_culture_menu", "recruiter_" + culture.GetName().ToString(), culture.GetName().ToString(),
 					delegate (MenuCallbackArgs args)
 				{
-					return Settlement.All.Count(settlement => settlement.Culture == culture && settlement.OwnerClan != null && !settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan)) > 0;
+					return Settlement.All.Count(settlement => settlement.Culture == culture && 
+					settlement.OwnerClan != null && 
+					!((settlement.OwnerClan.Kingdom != null && settlement.OwnerClan.Kingdom.IsAtWarWith(Hero.MainHero.Clan)) || 
+					settlement.OwnerClan.IsAtWarWith(Hero.MainHero.Clan) ||
+					(settlement.OwnerClan.Kingdom != null && Hero.MainHero.Clan.Kingdom != null && settlement.OwnerClan.Kingdom.IsAtWarWith(Hero.MainHero.Clan.Kingdom))
+					)
+					) > 0;
 				},
 				delegate (MenuCallbackArgs args)
 				{
@@ -471,7 +477,9 @@ namespace Recruiter
 			mobileParty.Aggressiveness = 0f;
 			props.party = mobileParty;
 			recruiterProperties.Add(props);
-			mobileParty.SetMoveGoToSettlement(findNearestSettlementWithRecruitableRecruits(mobileParty));
+			Settlement best = findNearestSettlementWithRecruitableRecruits(mobileParty);
+			if(best != null)
+				mobileParty.SetMoveGoToSettlement(best);
 			return mobileParty;
 		}
 
