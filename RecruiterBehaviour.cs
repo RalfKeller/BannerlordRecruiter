@@ -487,17 +487,17 @@ namespace Recruiter
 				}
 				GameMenu.SwitchToMenu("castle");
 			}, false, -1, false);
-			obj.AddGameMenuOption("recruiter_pay_menu", "recruiter_pay_medium", "Pay 2500.", delegate (MenuCallbackArgs args)
+			obj.AddGameMenuOption("recruiter_pay_menu", "recruiter_pay_medium", "Pay 1500.", delegate (MenuCallbackArgs args)
 			{
 				args.optionLeaveType = GameMenuOption.LeaveType.Recruit;
 				string stringId = Settlement.CurrentSettlement.StringId;
-				int cost = 2500;
+				int cost = 1500;
 				bool flag = cost >= Hero.MainHero.Gold;
 				return !flag;
 			}, delegate (MenuCallbackArgs args)
 			{
 				string stringId = Settlement.CurrentSettlement.StringId;
-				int cost = 2500;
+				int cost = 1500;
 				bool flag = cost <= Hero.MainHero.Gold;
 				if (flag)
 				{
@@ -506,17 +506,17 @@ namespace Recruiter
 				}
 				GameMenu.SwitchToMenu("castle");
 			}, false, -1, false);
-			obj.AddGameMenuOption("recruiter_pay_menu", "recruiter_pay_large", "Pay 5000.", delegate (MenuCallbackArgs args)
+			obj.AddGameMenuOption("recruiter_pay_menu", "recruiter_pay_large", "Pay 3000.", delegate (MenuCallbackArgs args)
 			{
 				args.optionLeaveType = GameMenuOption.LeaveType.Recruit;
 				string stringId = Settlement.CurrentSettlement.StringId;
-				int cost = 5000;
+				int cost = 3000;
 				bool flag = cost >= Hero.MainHero.Gold;
 				return !flag;
 			}, delegate (MenuCallbackArgs args)
 			{
 				string stringId = Settlement.CurrentSettlement.StringId;
-				int cost = 5000;
+				int cost = 3000;
 				bool flag = cost <= Hero.MainHero.Gold;
 				if (flag)
 				{
